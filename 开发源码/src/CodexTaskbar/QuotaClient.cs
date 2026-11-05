@@ -11,12 +11,23 @@ internal sealed class QuotaClient:IDisposable
     private readonly SemaphoreSlim gate=new(1,1);
     private readonly ConcurrentDictionary<long,TaskCompletionSource<JsonElement>> pending=new();
     private readonly CancellationTokenSource shutdown=new();
+    private readonly QuotaRecoveryPolicy recovery=new();
+    private readonly Func<string?> findExecutable;
+    private readonly Func<ProcessStartInfo,Process?> startProcess;
+    private readonly TimeSpan requestTimeout;
     private Process? process;
     private long requestId,accountVersion;
     private bool initialized;
     public long AccountVersion=>Interlocked.Read(ref accountVersion);
     public string? Executable {get;private set;}
     public event Action<bool>? Changed;
+    public int ConsecutiveRecoverableFailures=>recovery.ConsecutiveFailures;
+    public int AutomaticReconnectCount=>recovery.ReconnectCount;
+    public DateTimeOffset? LastAutomaticReconnect=>recovery.LastReconnectAt;
+    public int? QueryProcessId=>process is {HasExited:false} current?current.Id:null;
+
+    internal QuotaClient(Func<string?>? findExecutable=null,Func<ProcessStartInfo,Process?>? startProcess=null,TimeSpan? requestTimeout=null)
+    {this.findExecutable=findExecutable??FindCodex;this.startProcess=startProcess??Process.Start;this.requestTimeout=requestTimeout??TimeSpan.FromSeconds(20);}
 
     public async Task<QuotaSnapshot> RefreshAsync(string? limitId)
     {
@@ -35,10 +46,20 @@ internal sealed class QuotaClient:IDisposable
             if(version!=AccountVersion)throw new QuotaException("账号状态变化，正在重新查询",clear:true,retrySoon:true);
             var snapshot=QuotaParser.Parse(result,limitId,DateTimeOffset.UtcNow) with{IdentityVersion=version};
             if(snapshot.Windows.Count==0)throw new QuotaException("当前会话的额度类别暂不可用",clear:true);
+            recovery.RecordSuccess();
             return snapshot;
         }
+        catch(QuotaException e)
+        {
+            if(recovery.RecordFailure(e.Reconnectable,DateTimeOffset.UtcNow))
+            {
+                Reset();
+                throw new QuotaException("额度查询连续失败，正在自动重连",inner:e,retrySoon:true);
+            }
+            throw;
+        }
         catch(Exception e) when(e is IOException or InvalidOperationException or TimeoutException)
-        {Reset();throw new QuotaException("Codex 连接中断，稍后重试",inner:e);}
+        {recovery.RecordFailure(false,DateTimeOffset.UtcNow);Reset();throw new QuotaException("Codex 连接中断，稍后重试",inner:e);}
         finally{gate.Release();}
     }
 
@@ -46,17 +67,17 @@ internal sealed class QuotaClient:IDisposable
     {
         if(process is {HasExited:false} && initialized)return;
         Reset();
-        Executable=FindCodex();
+        Executable=findExecutable();
         if(Executable is null)throw new QuotaException("未找到 codex.exe，请启动或安装 Codex 桌面版");
         var start=new ProcessStartInfo(Executable){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,StandardOutputEncoding=Encoding.UTF8,StandardErrorEncoding=Encoding.UTF8,WorkingDirectory=AppContext.BaseDirectory};
         start.ArgumentList.Add("app-server");start.ArgumentList.Add("--listen");start.ArgumentList.Add("stdio://");
         start.ArgumentList.Add("-c");start.ArgumentList.Add("analytics.enabled=false");
-        process=Process.Start(start)??throw new IOException("Cannot launch Codex");
+        process=startProcess(start)??throw new IOException("Cannot launch Codex");
         var current=process;
         _=ReadOutputAsync(current);
         // Drain stderr without logging it: it can contain private environment details.
         _=DrainErrorsAsync(current);
-        await RequestAsync("initialize",new {clientInfo=new{name="codex_taskbar",title="Codex Taskbar",version="1.0.0"}});
+        await RequestAsync("initialize",new {clientInfo=new{name="codex_taskbar",title="Codex Taskbar",version=typeof(QuotaClient).Assembly.GetName().Version?.ToString(3)??"1.2.0"}});
         await current.StandardInput.WriteLineAsync("{\"method\":\"initialized\"}");
         await current.StandardInput.FlushAsync();initialized=true;
     }
@@ -70,7 +91,7 @@ internal sealed class QuotaClient:IDisposable
             var current=process??throw new IOException("Codex stopped");
             await current.StandardInput.WriteLineAsync(JsonSerializer.Serialize(new{id,method,@params=parameters}));
             await current.StandardInput.FlushAsync();
-            return await completion.Task.WaitAsync(TimeSpan.FromSeconds(20),shutdown.Token);
+            return await completion.Task.WaitAsync(requestTimeout,shutdown.Token);
         }
         finally{pending.TryRemove(id,out _);}
     }
@@ -80,6 +101,7 @@ internal sealed class QuotaClient:IDisposable
         {
             while(!shutdown.IsCancellationRequested && await current.StandardOutput.ReadLineAsync(shutdown.Token) is { } line)
             {
+                if(!ReferenceEquals(Volatile.Read(ref process),current))break;
                 try
                 {
                     using var doc=JsonDocument.Parse(line);var root=doc.RootElement;
@@ -91,7 +113,9 @@ internal sealed class QuotaClient:IDisposable
                         {
                             var message=JsonValue.String(error,"message")??"";
                             var auth=message.Contains("401",StringComparison.OrdinalIgnoreCase)||message.Contains("unauthorized",StringComparison.OrdinalIgnoreCase)||message.Contains("not logged",StringComparison.OrdinalIgnoreCase);
-                            completion.TrySetException(new QuotaException(auth?"Codex 登录已失效，请重新登录":$"额度查询失败（RPC {JsonValue.Long(error,"code")}）",auth));
+                            var code=JsonValue.Long(error,"code");
+                            var reconnectable=!auth && code is -32603 or >=-32099 and <=-32000;
+                            completion.TrySetException(new QuotaException(auth?"Codex 登录已失效，请重新登录":$"额度查询失败（RPC {code}）",auth,reconnectable:reconnectable));
                         }
                         else completion.TrySetResult(JsonValue.Child(root,"result").Clone());
                     }
@@ -131,5 +155,5 @@ internal sealed class QuotaClient:IDisposable
     public void Dispose(){shutdown.Cancel();Reset();shutdown.Dispose();}
 }
 
-internal sealed class QuotaException(string message,bool clear=false,Exception? inner=null,bool retrySoon=false):Exception(message,inner)
-{public bool ClearSnapshot {get;}=clear;public bool RetrySoon {get;}=retrySoon;}
+internal sealed class QuotaException(string message,bool clear=false,Exception? inner=null,bool retrySoon=false,bool reconnectable=false):Exception(message,inner)
+{public bool ClearSnapshot {get;}=clear;public bool RetrySoon {get;}=retrySoon;public bool Reconnectable {get;}=reconnectable;}

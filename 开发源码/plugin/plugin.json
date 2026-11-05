@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "codex-taskbar",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "在 Windows 10/11 任务栏显示 Codex 剩余额度、今日累计 Token 和重置时间。",
   "extensions": {
     "com.openai": {

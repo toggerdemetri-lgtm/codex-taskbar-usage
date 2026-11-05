@@ -7,11 +7,12 @@ namespace CodexTaskbar.WindowsTests;
 internal static class Program
 {
     [STAThread]
-    private static int Main()
+    private static int Main(string[] args)
     {
+        if(args.Length>0 && args[0]=="app-server")return QuotaClientRecoveryTests.RunFakeServer();
+        var failures=QuotaClientRecoveryTests.RunAsync().GetAwaiter().GetResult();
         Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
         Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
-        var failures=0;
         foreach(var context in new nint[]{-2,-4})
         {
             var previous=Native.SetThreadDpiAwarenessContext(context);

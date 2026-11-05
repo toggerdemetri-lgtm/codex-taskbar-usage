@@ -12,9 +12,9 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| `CodexTaskbar-v1.1.0-win10-win11-x64.zip` | 日常使用的便携版，解压后双击 `CodexTaskbar.exe`，自带 .NET 运行环境。 |
-| `CodexTaskbar-v1.1.0-plugin-win10-win11-x64.zip` | 同一程序加本地 Codex 插件，可通过指令启动、停止、查询状态。 |
-| `CodexTaskbar-v1.1.0-source.zip` | 源码、构建脚本及回归测试的独立归档。 |
+| `CodexTaskbar-v1.2.0-win10-win11-x64.zip` | 日常使用的便携版，解压后双击 `CodexTaskbar.exe`，自带 .NET 运行环境。 |
+| `CodexTaskbar-v1.2.0-plugin-win10-win11-x64.zip` | 同一程序加本地 Codex 插件，可通过指令启动、停止、查询状态。 |
+| `CodexTaskbar-v1.2.0-source.zip` | 源码、构建脚本及回归测试的独立归档。 |
 
 目标系统为 Windows 10 2004（build 19041）及以上、Windows 11，x64 主屏水平任务栏；需要已安装、已登录且支持该系统的 Codex 桌面版。开机启动默认关闭。
 
@@ -35,6 +35,7 @@
 - 剩余额度通常每 60 秒查询。5 小时和周额度同时存在时，显示剩余比例较低的周期；比例相同时选较短周期。
 - 重置日期与当前所选周期对应，按本地时区显示。
 - 剩余比例 11%～20% 显示橙色，10% 及以下显示红色；查询失败保留旧快照并标记过期。
+- 连续3次可重试RPC失败后自动重建组件查询连接并立即再试，两次自动重建至少间隔2分钟。取得有效额度后自动清除过期标记；登录失效提示重新登录。
 - 右键用量区域：立即刷新、查看用量详情、开机启动、退出。无额外托盘图标。
 - 单实例运行，支持 Explorer 重启恢复，以及本地启动、停止、状态查询。
 
@@ -61,13 +62,13 @@ Set-Location .\开发源码
 .\scripts\dotnet.ps1 run --project tests\CodexTaskbar.Tests -c Release
 ```
 
-已通过 58 项行为测试和 7 项 Windows 原生集成检查。原生检查可运行：
+已通过 64 项行为测试、6 项查询恢复集成测试和 7 项 Windows 原生检查。原生检查可运行：
 
 ```powershell
 .\scripts\dotnet.ps1 run --project tests\CodexTaskbar.WindowsTests -c Release
 ```
 
-原生集成检查会短暂创建测试控件，仅用于 MSAA 与 DPI 验证，不能替代 Win10 真机验收。
+集成检查使用隔离假查询进程，并会短暂创建测试控件验证 MSAA 与 DPI，不能替代 Win10 真机验收。
 
 ## 本地控制
 

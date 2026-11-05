@@ -124,6 +124,7 @@ internal sealed class TaskbarApplication:ApplicationContext
             }
             lines.Add("额度更新："+quota.UpdatedAt.ToLocalTime().ToString("MM-dd HH:mm:ss")+(IsStale?" · 数据已过期":""));
         }
+        if(quotaClient.AutomaticReconnectCount>0)lines.Add($"额度连接自动重建 {quotaClient.AutomaticReconnectCount} 次 · 最近 {quotaClient.LastAutomaticReconnect?.ToLocalTime():MM-dd HH:mm:ss}");
         if(quotaError is not null)lines.Add(quotaError);if(sessionError is not null)lines.Add(sessionError);if(host.Error is not null)lines.Add(host.Error);
         return string.Join("\n",lines);
     }
@@ -183,6 +184,8 @@ internal sealed class TaskbarApplication:ApplicationContext
         rightClickAreaReady=host.Attached && new[]{new Point(2,2),new Point(surface.Width/2,surface.Height/2),new Point(surface.Width-3,surface.Height-3)}.All(p=>Native.WindowFromPoint(new Native.Point(Native.Bounds(surface.Handle).Left+p.X,Native.Bounds(surface.Handle).Top+p.Y))==surface.Handle),
         textFits=surface.TextFits(surface.DpiScale),quota=surface.QuotaText,tokens=surface.TokenText,reset=surface.ResetLine,stale=IsStale,
         sessionId=session?.Id,lockedSessionId=(string?)null,sessionCount=sessions.Count,sessionError,quotaError,
+        quotaQueryProcessId=quotaClient.QueryProcessId,quotaFailureStreak=quotaClient.ConsecutiveRecoverableFailures,
+        quotaReconnectCount=quotaClient.AutomaticReconnectCount,lastQuotaReconnect=quotaClient.LastAutomaticReconnect,nextQuotaRefresh=nextQuota,
         totalTokens=dailyTokens,sessionTotalTokens=session?.TotalTokens,usageScope="localDay",lastQuotaUpdate=quota?.UpdatedAt,scales=new[]{1d,1.25,1.5,2}.Select(s=>new{scale=s,textFits=surface.TextFits(s)}).ToArray()
     });
     protected override void ExitThreadCore()

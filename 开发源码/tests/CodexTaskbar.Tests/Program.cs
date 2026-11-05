@@ -23,6 +23,7 @@ tests.AddRange(FormatTests.All());
 tests.AddRange(DailyTests.All());
 tests.AddRange(LayoutStabilityTests.All());
 tests.AddRange(TaskbarCompatibilityTests.All());
+tests.AddRange(QuotaRecoveryTests.All());
 var failures=0;
 foreach (var test in tests) { try { test.Run(); Console.WriteLine("PASS " + test.Name); } catch(Exception e) { failures++; Console.WriteLine("FAIL " + test.Name + ": " + e.Message); } }
 Console.WriteLine($"{tests.Count-failures}/{tests.Count} passed");
