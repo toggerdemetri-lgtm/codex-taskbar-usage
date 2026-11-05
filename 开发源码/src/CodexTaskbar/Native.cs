@@ -22,6 +22,9 @@ internal static class Native
     [DllImport("user32.dll")] internal static extern bool IsWindow(nint hwnd);
     [DllImport("user32.dll")] internal static extern bool IsWindowVisible(nint hwnd);
     [DllImport("user32.dll")] internal static extern uint GetDpiForWindow(nint hwnd);
+    [DllImport("user32.dll")] internal static extern nint GetWindowDpiAwarenessContext(nint hwnd);
+    [DllImport("user32.dll",SetLastError=true)] internal static extern nint SetThreadDpiAwarenessContext(nint context);
+    [DllImport("user32.dll")] internal static extern bool AreDpiAwarenessContextsEqual(nint first,nint second);
     [DllImport("user32.dll")] internal static extern nint MonitorFromWindow(nint hwnd,uint flags);
     [DllImport("user32.dll")] internal static extern uint GetWindowThreadProcessId(nint hwnd,out uint processId);
     [DllImport("user32.dll",CharSet=CharSet.Unicode)] internal static extern uint RegisterWindowMessage(string name);

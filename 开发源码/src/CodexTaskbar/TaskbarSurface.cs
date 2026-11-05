@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using CodexTaskbar.Core;
 
 namespace CodexTaskbar;
 
@@ -11,12 +12,27 @@ internal sealed class TaskbarSurface:Form
     internal double DpiScale=1;
     internal bool Stale;
     internal int PaintCount;
-    public TaskbarSurface()
+    private static double LineHeightAtScaleOne
+    {
+        get{var family=SystemFonts.MessageBoxFont!.FontFamily;return 12d*family.GetLineSpacing(FontStyle.Regular)/family.GetEmHeight(FontStyle.Regular);}
+    }
+    internal double TextScale=>UsageLayout.FontScale(DpiScale,Height,LineHeightAtScaleOne);
+    private TaskbarSurface()
     {
         Text="Codex Taskbar";FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;StartPosition=FormStartPosition.Manual;
         Bounds=new(-10000,-10000,240,36);AutoScaleMode=AutoScaleMode.None;DoubleBuffered=true;AccessibleName="Codex 用量";AccessibleRole=AccessibleRole.Pane;
     }
     protected override bool ShowWithoutActivation=>true;
+    internal static TaskbarSurface CreateForTaskbar(nint dpiParent=0)
+    {
+        var target=dpiParent!=0?dpiParent:Native.FindWindow("Shell_TrayWnd",null);
+        var context=target!=0?Native.GetWindowDpiAwarenessContext(target):0;
+        var previous=context!=0?Native.SetThreadDpiAwarenessContext(context):0;
+        // WinForms caches DPI awareness in Control's constructor, before CreateHandle.
+        try{var surface=new TaskbarSurface();_=surface.Handle;return surface;}
+        finally{if(previous!=0)Native.SetThreadDpiAwarenessContext(previous);}
+    }
+    internal bool MatchesDpiContext(nint parent)=>Native.AreDpiAwarenessContextsEqual(Native.GetWindowDpiAwarenessContext(Handle),Native.GetWindowDpiAwarenessContext(parent));
     protected override CreateParams CreateParams {get{var p=base.CreateParams;p.ExStyle|=0x80|0x08000000|0x00080000;return p;}}
     protected override void OnPaint(PaintEventArgs e){RenderLayered();}
     internal bool RenderLayered()
@@ -39,8 +55,9 @@ internal sealed class TaskbarSurface:Form
         // Alpha 1 is visually transparent but keeps blank gaps inside the right-click hit area.
         graphics.Clear(Color.FromArgb(1,0,0,0));
         graphics.TextRenderingHint=System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-        using var font=new Font(SystemFonts.MessageBoxFont!.FontFamily,(float)(12*scale),FontStyle.Regular,GraphicsUnit.Pixel);
-        using var small=new Font(SystemFonts.MessageBoxFont!.FontFamily,(float)(11*scale),FontStyle.Regular,GraphicsUnit.Pixel);
+        var textScale=UsageLayout.FontScale(scale,rectangle.Height,LineHeightAtScaleOne);
+        using var font=new Font(SystemFonts.MessageBoxFont!.FontFamily,(float)(12*textScale),FontStyle.Regular,GraphicsUnit.Pixel);
+        using var small=new Font(SystemFonts.MessageBoxFont!.FontFamily,(float)(11*textScale),FontStyle.Regular,GraphicsUnit.Pixel);
         var padding=(int)Math.Round(5*scale);var leftWidth=(int)Math.Round(78*scale);var half=rectangle.Height/2;
         var color=Stale?(light?Color.FromArgb(120,90,30):Color.FromArgb(235,189,110)):Remaining switch{<=10=>light?Color.FromArgb(180,35,35):Color.FromArgb(255,130,130),<=20=>light?Color.FromArgb(150,85,0):Color.FromArgb(240,190,100),_=>foreground};
         using var format=new StringFormat{LineAlignment=StringAlignment.Center,FormatFlags=StringFormatFlags.NoWrap,Trimming=StringTrimming.EllipsisCharacter};

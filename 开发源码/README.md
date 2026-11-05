@@ -1,6 +1,6 @@
 # Codex 任务栏用量
 
-Windows 11 x64 原生组件，在主屏任务栏空白位置显示两行：
+Windows 10（2004/build19041及以上）和Windows 11 x64兼容组件，在主屏水平任务栏空白位置显示两行：
 
 ```text
 周余 22%    今日 12.80M
@@ -24,7 +24,7 @@ Windows 11 x64 原生组件，在主屏任务栏空白位置显示两行：
 - **重置**：所选周期的重置时间，采用 Windows 本地时区。到时重新查询服务端，不自行假定额度已恢复。
 - `--` 表示未知，不能理解为0；`*` 和“数据过期”表示最后一次额度快照已过期或查询失败。额度通常每60秒刷新，失败后间隔逐渐增至最多5分钟。
 
-首版支持本机桌面会话、主屏水平任务栏和订阅剩余额度。没有 API 金额、跨机器聚合或充值 Credits 功能。自定义 `CODEX_HOME` 时跟随该目录。
+支持本机桌面会话、主屏水平任务栏和订阅剩余额度。没有 API 金额、跨机器聚合或充值 Credits 功能。自定义 `CODEX_HOME` 时跟随该目录。版本1.1.0增加Windows10传统任务栏控件和DPI适配；Win11 24H2已实测，Win10尚待真实设备验收。
 
 ## 命令和本地插件
 
@@ -58,4 +58,4 @@ Windows 11 x64 原生组件，在主屏任务栏空白位置显示两行：
 .\scripts\dotnet.ps1 run --project tests\CodexTaskbar.Tests
 ```
 
-实际验收记录见源码包中的 `docs\verification.md`。100%和150%实测可见；本机200%时任务栏空间不足会隐藏文字，恢复较小缩放后重新显示。
+实际验收记录见源码包中的 `docs\verification.md`。58项行为测试和7项Windows原生集成检查覆盖传统任务栏角色、MSAA读取、两种DPI上下文、实际SetParent和小任务栏双行字体。原生检查运行 `scripts\dotnet.ps1 run --project tests\CodexTaskbar.WindowsTests -c Release`，会短暂创建测试控件。

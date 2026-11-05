@@ -1,6 +1,6 @@
 {
   "name": "codex-taskbar",
-  "version": "1.0.0",
-  "description": "Windows taskbar companion for Codex quota and daily token usage.",
+  "version": "1.1.0",
+  "description": "Windows 10/11 taskbar companion for Codex quota and daily token usage.",
   "skills": "./skills/"
 }

@@ -21,6 +21,8 @@ internal static class Program
         {var response=ControlServer.SendAsync(args.Contains("--start")?"refresh":"menu").GetAwaiter().GetResult();Console.WriteLine(response??"{\"running\":true}");return response is null?2:0;}
         try
         {
+            if(!OperatingSystem.IsWindowsVersionAtLeast(10,0,19041))
+            {MessageBox.Show("此版本需要Windows 10 2004及以上或Windows 11（x64）。","Codex 用量",MessageBoxButtons.OK,MessageBoxIcon.Information);return 1;}
             ApplicationConfiguration.Initialize();
             if(args.Contains("--diagnose"))
             {

@@ -35,7 +35,7 @@ internal sealed class TaskbarApplication:ApplicationContext
     }
     private void CreateSurface()
     {
-        surface=new TaskbarSurface();host=new(surface);
+        surface=TaskbarSurface.CreateForTaskbar();host=new(surface);
         var menu=new ContextMenuStrip();
         // WinForms initially cancels an empty menu; populate it before clearing cancellation.
         menu.Opening+=(_,e)=>{BuildMenu(menu);e.Cancel=false;};surface.ContextMenuStrip=menu;
@@ -43,7 +43,11 @@ internal sealed class TaskbarApplication:ApplicationContext
     private void Tick()
     {
         if(closing)return;
-        if(surface.IsDisposed){CreateSurface();surface.Show();measurement=null;}
+        if(surface.IsDisposed || host.NeedsDpiRecreate)
+        {
+            if(!surface.IsDisposed){host.Detach();tooltip.SetToolTip(surface,null);surface.ContextMenuStrip?.Dispose();surface.Dispose();}
+            CreateSurface();surface.Show();measurement=null;
+        }
         var now=DateTimeOffset.UtcNow;
         if(measurement is null){measurementStarted=now;measurement=Task.Run(TaskbarHost.Measure);}
         else if(measurement.IsCompleted)
@@ -173,6 +177,8 @@ internal sealed class TaskbarApplication:ApplicationContext
         parentClass=host.Parent==0?null:Native.Class(host.Parent),window=surface.Handle.ToInt64(),parent=host.Parent.ToInt64(),bounds=host.Bounds,keepingLastLayout=host.KeepingLastLayout,
         visible=Native.IsWindowVisible(surface.Handle),actualBounds=Native.Bounds(surface.Handle),style=Native.GetWindowLong(surface.Handle,Native.GwlStyle),
         exStyle=Native.GetWindowLong(surface.Handle,-20),paintCount=surface.PaintCount,
+        version=Application.ProductVersion,windowsVersion=Environment.OSVersion.Version.ToString(),boundarySource=host.BoundarySource,textScale=surface.TextScale,
+        dpiContextMatched=host.Attached && surface.MatchesDpiContext(host.Parent),
         trayIcon=false,menuVisible=surface.ContextMenuStrip?.Visible??false,menuItems=surface.ContextMenuStrip?.Items.Cast<ToolStripItem>().Select(i=>i.Text).ToArray(),
         rightClickAreaReady=host.Attached && new[]{new Point(2,2),new Point(surface.Width/2,surface.Height/2),new Point(surface.Width-3,surface.Height-3)}.All(p=>Native.WindowFromPoint(new Native.Point(Native.Bounds(surface.Handle).Left+p.X,Native.Bounds(surface.Handle).Top+p.Y))==surface.Handle),
         textFits=surface.TextFits(surface.DpiScale),quota=surface.QuotaText,tokens=surface.TokenText,reset=surface.ResetLine,stale=IsStale,

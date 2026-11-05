@@ -1,6 +1,6 @@
 # Codex 任务栏用量
 
-在 Windows 11 任务栏中查看 Codex 今日 Token 用量、订阅剩余额度和重置时间。
+在 Windows 10 / Windows 11 任务栏中查看 Codex 今日 Token 用量、订阅剩余额度和重置时间。
 
 ![任务栏实际效果](开发源码/docs/images/taskbar.png)
 
@@ -12,11 +12,21 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| `CodexTaskbar-v1.0.0-win-x64.zip` | 日常使用的便携版，解压后双击 `CodexTaskbar.exe`，自带 .NET 运行环境。 |
-| `CodexTaskbar-v1.0.0-plugin-win-x64.zip` | 同一程序加本地 Codex 插件，可通过指令启动、停止、查询状态。 |
-| `CodexTaskbar-v1.0.0-source.zip` | 源码、构建脚本及回归测试的独立归档。 |
+| `CodexTaskbar-v1.1.0-win10-win11-x64.zip` | 日常使用的便携版，解压后双击 `CodexTaskbar.exe`，自带 .NET 运行环境。 |
+| `CodexTaskbar-v1.1.0-plugin-win10-win11-x64.zip` | 同一程序加本地 Codex 插件，可通过指令启动、停止、查询状态。 |
+| `CodexTaskbar-v1.1.0-source.zip` | 源码、构建脚本及回归测试的独立归档。 |
 
-需要 Windows 11 x64 水平任务栏，以及已安装、已登录的 Codex 桌面版。开机启动默认关闭。
+目标系统为 Windows 10 2004（build 19041）及以上、Windows 11，x64 主屏水平任务栏；需要已安装、已登录且支持该系统的 Codex 桌面版。开机启动默认关闭。
+
+### 兼容验证范围
+
+| 环境 | 验证状态 |
+| --- | --- |
+| Windows 11 24H2 | 本机实际挂接、真实额度/用量、单实例与 Explorer 重启恢复验收。 |
+| Windows 10 传统任务栏 | 已适配 UIA 标签/列表角色和只读 MSAA 控件边界，完成原生控件及 System-Aware DPI 模拟测试；尚无 Win10 真机/虚拟机验收。 |
+| 小任务栏 / 100%～200% 缩放 | 双行字体高度和布局回归测试。 |
+
+兼容适配与真实系统验收分别记录，详情见[验收记录](开发源码/docs/verification.md)。
 
 ## 功能
 
@@ -51,7 +61,13 @@ Set-Location .\开发源码
 .\scripts\dotnet.ps1 run --project tests\CodexTaskbar.Tests -c Release
 ```
 
-已通过 49 项行为测试及本机任务栏验收。具体证据和未覆盖场景见[验收记录](开发源码/docs/verification.md)。
+已通过 58 项行为测试和 7 项 Windows 原生集成检查。原生检查可运行：
+
+```powershell
+.\scripts\dotnet.ps1 run --project tests\CodexTaskbar.WindowsTests -c Release
+```
+
+原生集成检查会短暂创建测试控件，仅用于 MSAA 与 DPI 验证，不能替代 Win10 真机验收。
 
 ## 本地控制
 

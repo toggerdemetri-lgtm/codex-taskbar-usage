@@ -5,7 +5,7 @@ description: 启动、停止或查看 Windows Codex 任务栏用量组件。用�
 
 # Codex 任务栏用量
 
-仅适用于本机 Windows x64 交互式桌面。组件独立运行，以自有子窗口嵌入任务栏，不修改 Codex 文件。
+仅适用于本机 Windows10（2004及以上）/Windows11 x64交互式桌面及主屏水平任务栏。组件独立运行，以自有子窗口嵌入任务栏，不修改Codex文件。Win10尚待真实设备验收，状态成功才表示当前机器已实际挂接。
 
 从本 SKILL.md 所在目录解析 `../../scripts/control.ps1`，直接在当前 PowerShell 执行：
 
