@@ -32,6 +32,7 @@ if ($taskStopped.running) { throw '停止命令后仍有实例' }
 Start-Process -FilePath $taskExe -ArgumentList '--start' -WindowStyle Hidden
 $taskBefore = Wait-TaskbarReady
 if ($taskBefore.parentClass -ne 'Shell_TrayWnd' -or !$taskBefore.visible -or !$taskBefore.textFits) { throw '原生嵌入或可见文本验收失败' }
+if (!$taskBefore.dpiContextMatched) { throw '任务栏与组件DPI上下文不一致' }
 if (@($taskBefore.scales | Where-Object { !$_.textFits }).Count -ne 0) { throw '缩放文字宽度检查失败' }
 Start-Process -FilePath $taskExe -ArgumentList '--start' -WindowStyle Hidden -Wait
 $taskDuplicate = Invoke-TaskbarControl '--status'
@@ -64,4 +65,4 @@ Start-Process -FilePath $taskExe -ArgumentList @('--capture','--output',('"'+$ta
 if (!(Test-Path -LiteralPath $taskScreenshot)) { throw '实际任务栏截图未生成' }
 $taskFinal = Invoke-TaskbarControl '--status'
 $taskFinal | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskOutputDir 'final-status.json') -Encoding utf8
-[pscustomobject]@{nativeEmbedding='passed';liveQuota='passed';liveTokens='passed';singleInstance='passed';stopStart='passed';textWidth100to200='passed';explorerRestart=$taskRestartResult;screenshot=$taskScreenshot;pid=$taskFinal.pid} | ConvertTo-Json | Tee-Object -FilePath (Join-Path $taskOutputDir 'smoke-result.json')
+[pscustomobject]@{nativeEmbedding='passed';dpiContext='passed';liveQuota='passed';liveTokens='passed';singleInstance='passed';stopStart='passed';textWidth100to200='passed';explorerRestart=$taskRestartResult;windowsVersion=$taskFinal.windowsVersion;boundarySource=$taskFinal.boundarySource;screenshot=$taskScreenshot;pid=$taskFinal.pid} | ConvertTo-Json | Tee-Object -FilePath (Join-Path $taskOutputDir 'smoke-result.json')

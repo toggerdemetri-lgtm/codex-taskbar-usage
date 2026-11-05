@@ -1,6 +1,6 @@
 namespace CodexTaskbar.Core;
 
-public sealed record TaskbarGeometry(nint Handle,PixelRect Bar,int TrayLeft,uint Dpi,IReadOnlyList<PixelRect> Occupied,string? Error,bool Transient=false);
+public sealed record TaskbarGeometry(nint Handle,PixelRect Bar,int TrayLeft,uint Dpi,IReadOnlyList<PixelRect> Occupied,string? Error,bool Transient=false,string BoundarySource="uia");
 
 public sealed class TaskbarLayoutState
 {
