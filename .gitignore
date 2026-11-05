@@ -1,0 +1,20 @@
+# Local runnable files and downloadable archives are published through Releases.
+运行程序/
+发布包/
+
+# Reproducible build outputs and local tool caches.
+**/bin/
+**/obj/
+**/.tools/
+**/artifacts/
+.vs/
+*.user
+*.log
+*.tmp
+
+# Local diagnostic data and credentials do not belong in the repository.
+auth.json
+settings.json
+status.json
+.env
+.env.*
