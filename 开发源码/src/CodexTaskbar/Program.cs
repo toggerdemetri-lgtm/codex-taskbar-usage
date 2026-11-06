@@ -18,6 +18,7 @@ internal static class Program
         }
         try
         {
+            Settings.MigrateLegacyAutoStart();
             var autostart=args.Contains("--autostart");
             if(autostart)
             {
@@ -31,7 +32,7 @@ internal static class Program
             try
             {
             if(!OperatingSystem.IsWindowsVersionAtLeast(10,0,19041))
-            {MessageBox.Show("此版本需要Windows 10 2004及以上或Windows 11（x64）。","Codex 用量",MessageBoxButtons.OK,MessageBoxIcon.Information);return 1;}
+            {MessageBox.Show("此版本需要Windows 10 2004及以上或Windows 11（x64）。",AppBrand.Name,MessageBoxButtons.OK,MessageBoxIcon.Information);return 1;}
             ApplicationConfiguration.Initialize();
             if(args.Contains("--diagnose"))
             {

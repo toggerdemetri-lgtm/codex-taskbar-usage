@@ -22,7 +22,14 @@ internal sealed class Settings
         File.Move(temp,AppPaths.SettingsFile,true);
     }
     private const string RunKey="Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-    private static readonly StartupRegistration Startup=new(Path.Combine(AppContext.BaseDirectory,"CodexTaskbar.exe"),Environment.GetFolderPath(Environment.SpecialFolder.Startup),RunKey);
+    private static readonly StartupRegistration Startup=new(Path.Combine(AppContext.BaseDirectory,AppBrand.ExecutableName),Environment.GetFolderPath(Environment.SpecialFolder.Startup),RunKey);
+    internal static string? StartupMigrationError {get;private set;}
+    internal static void MigrateLegacyAutoStart()
+    {
+        try{Startup.MigrateLegacy();StartupMigrationError=null;}
+        catch(Exception e) when(e is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException)
+        {StartupMigrationError="旧版自启动迁移未完成，请重新开启开机启动";}
+    }
     public static bool AutoStartEnabled=>Startup.Enabled;
     public static void SetAutoStart(bool enabled)=>Startup.SetEnabled(enabled);
 }

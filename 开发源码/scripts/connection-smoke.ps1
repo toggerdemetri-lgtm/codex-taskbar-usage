@@ -1,6 +1,6 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path -Parent $PSScriptRoot
-$taskExe = Join-Path (Split-Path -Parent $taskRoot) '运行程序\CodexTaskbar.exe'
+$taskExe = Join-Path (Split-Path -Parent $taskRoot) '运行程序\Codex用量任务栏.exe'
 $taskOutput = Join-Path $taskRoot 'artifacts\verification'
 New-Item -ItemType Directory -Path $taskOutput -Force | Out-Null
 function Read-ConnectionState {

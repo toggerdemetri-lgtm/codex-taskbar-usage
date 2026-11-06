@@ -77,7 +77,7 @@ internal sealed class QuotaClient:IDisposable
         _=ReadOutputAsync(current);
         // Drain stderr without logging it: it can contain private environment details.
         _=DrainErrorsAsync(current);
-        await RequestAsync("initialize",new {clientInfo=new{name="codex_taskbar",title="Codex Taskbar",version=typeof(QuotaClient).Assembly.GetName().Version?.ToString(3)??"1.2.0"}});
+        await RequestAsync("initialize",new {clientInfo=new{name="codex_taskbar",title=AppBrand.Name,version=typeof(QuotaClient).Assembly.GetName().Version?.ToString(3)??"1.3.0"}});
         await current.StandardInput.WriteLineAsync("{\"method\":\"initialized\"}");
         await current.StandardInput.FlushAsync();initialized=true;
     }

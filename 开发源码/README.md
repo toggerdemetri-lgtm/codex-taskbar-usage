@@ -1,4 +1,4 @@
-# Codex 任务栏用量
+# Codex用量任务栏
 
 Windows 10（2004/build19041及以上）和Windows 11 x64兼容组件，在主屏水平任务栏空白位置显示两行：
 
@@ -11,7 +11,7 @@ Windows 10（2004/build19041及以上）和Windows 11 x64兼容组件，在主�
 
 ## 使用
 
-解压“发布包”中的 `Codex任务栏用量-便携版-Windows10-11-x64.zip`，双击 `CodexTaskbar.exe`。发布程序自带 .NET 运行环境，不需要单独安装 .NET。需要已安装并登录 Codex 桌面版。
+解压“发布包”中的 `Codex用量任务栏-便携版-Windows10-11-x64.zip`，双击 `Codex用量任务栏.exe`。发布程序自带 .NET 运行环境，不需要单独安装 .NET。需要已安装并登录 Codex 桌面版。
 
 在任务栏文字上右键：立即刷新、查看用量详情、开机启动、退出。开机启动默认关闭，启用后请保持程序路径不变。详情及悬停显示今日精确 Token、统计范围、各周期剩余额度、重置倒计时和更新时间。
 
@@ -24,21 +24,21 @@ Windows 10（2004/build19041及以上）和Windows 11 x64兼容组件，在主�
 - **重置**：所选周期的重置时间，采用 Windows 本地时区。到时重新查询服务端，不自行假定额度已恢复。
 - `--` 表示未知，不能理解为0；`*` 和“数据过期”表示最后一次额度快照已过期或查询失败。额度通常每60秒刷新，失败后间隔逐渐增至最多5分钟。连续3次可重试RPC失败会自动重建组件自己的查询连接，随后立即重试；两次自动重建至少间隔2分钟。网络断连或超时沿用即时连接重建。取得有效额度后自动清除星号和过期标记；登录失效需在Codex重新登录，无效协议错误不会触发反复重建。
 
-支持本机桌面会话、主屏水平任务栏和订阅剩余额度。没有 API 金额、跨机器聚合或充值 Credits 功能。自定义 `CODEX_HOME` 时跟随该目录。版本1.2.1增加原生登录启动补偿，保留1.2.0的额度查询自动恢复，保留1.1.0的Windows10传统任务栏控件和DPI适配；Win11 24H2已实测，Win10尚待真实设备验收。
+支持本机桌面会话、主屏水平任务栏和订阅剩余额度。没有 API 金额、跨机器聚合或充值 Credits 功能。自定义 `CODEX_HOME` 时跟随该目录。版本1.3.0增加原生登录启动补偿，保留1.2.0的额度查询自动恢复，保留1.1.0的Windows10传统任务栏控件和DPI适配；Win11 24H2已实测，Win10尚待真实设备验收。
 
 ## 命令和本地插件
 
 ```powershell
-.\CodexTaskbar.exe --start
-.\CodexTaskbar.exe --status --output .\status.json
-.\CodexTaskbar.exe --menu
-.\CodexTaskbar.exe --stop --output .\stop.json
-.\CodexTaskbar.exe --capture --output .\taskbar.png
+.\Codex用量任务栏.exe --start
+.\Codex用量任务栏.exe --status --output .\status.json
+.\Codex用量任务栏.exe --menu
+.\Codex用量任务栏.exe --stop --output .\stop.json
+.\Codex用量任务栏.exe --capture --output .\taskbar.png
 ```
 
 `--menu` 打开用量区域的控制菜单。`--capture` 截取任务栏及已展开菜单，作为本地诊断文件。重复启动复用现有实例，并打开菜单；`--start` 则只启动或刷新。状态中 `attached=true` 才表示成功嵌入。
 
-`Codex任务栏用量-Codex插件版-Windows10-11-x64.zip` 包含本地 Codex 插件清单、skill、控制脚本和同一程序；解压后可由本地插件加载机制加载，也可直接执行 `scripts\control.ps1 -Action Start|Stop|Status`。未发布到插件市场，未自动更改 Codex 插件配置。
+`Codex用量任务栏-Codex插件版-Windows10-11-x64.zip` 包含本地 Codex 插件清单、skill、控制脚本和同一程序；解压后可由本地插件加载机制加载，也可直接执行 `scripts\control.ps1 -Action Start|Stop|Status`。未发布到插件市场，未自动更改 Codex 插件配置。
 
 开机启动仅由菜单开关写入当前用户 Run 项。旧版本的会话锁定文件不再读取。卸载时先取消开机启动并退出，然后删除解压目录；可选删除 `%LOCALAPPDATA%\CodexTaskbar` 中的旧设置及诊断数据。
 
@@ -58,6 +58,8 @@ Windows 10（2004/build19041及以上）和Windows 11 x64兼容组件，在主�
 .\scripts\dotnet.ps1 run --project tests\CodexTaskbar.Tests
 ```
 
-实际验收记录见源码包中的 `docs\verification.md`。64项行为测试、6项查询恢复集成测试、4项原生启动注册测试和7项Windows原生检查覆盖传统任务栏角色、MSAA读取、两种DPI上下文、实际SetParent和小任务栏双行字体。原生检查运行 `scripts\dotnet.ps1 run --project tests\CodexTaskbar.WindowsTests -c Release`，会短暂创建测试控件。
+实际验收记录见源码包中的 `docs\verification.md`。64项行为测试、6项查询恢复集成测试、8项原生启动注册测试和7项Windows原生检查覆盖传统任务栏角色、MSAA读取、两种DPI上下文、实际SetParent和小任务栏双行字体。原生检查运行 `scripts\dotnet.ps1 run --project tests\CodexTaskbar.WindowsTests -c Release`，会短暂创建测试控件。
 
 启用“开机启动”会同时设置当前用户Run项和直接指向程序的普通启动快捷方式。快捷方式的自动启动入口等待15秒让桌面就绪，并在等待前后检查开关；关闭时移除两处入口。升级后已启用自启动的用户，可关闭再开启一次以补建普通快捷方式。
+
+1.3.0统一名称为Codex用量任务栏，程序文件为 `Codex用量任务栏.exe`，图标已内置。首次运行会迁移同目录旧版已开启的自启动并移除对应旧快捷方式；原先关闭自启动的用户保持关闭。

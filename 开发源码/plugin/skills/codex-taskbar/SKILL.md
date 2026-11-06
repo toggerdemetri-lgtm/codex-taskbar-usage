@@ -1,9 +1,9 @@
 ---
 name: codex-taskbar
-description: 启动、停止或查看 Windows Codex 任务栏用量组件。用于用户要求在任务栏显示订阅剩余额度、今日累计 Token、重置时间，或检查该组件状态。
+description: 启动、停止或查看 Windows Codex用量任务栏组件。用于用户要求在任务栏显示订阅剩余额度、今日累计 Token、重置时间，或检查该组件状态。
 ---
 
-# Codex 任务栏用量
+# Codex用量任务栏
 
 仅适用于本机 Windows10（2004及以上）/Windows11 x64交互式桌面及主屏水平任务栏。组件独立运行，以自有子窗口嵌入任务栏，不修改Codex文件。Win10尚待真实设备验收，状态成功才表示当前机器已实际挂接。
 

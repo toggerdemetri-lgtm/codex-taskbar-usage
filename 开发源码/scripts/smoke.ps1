@@ -1,5 +1,5 @@
-param(
-    [string]$Executable = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) '运行程序\CodexTaskbar.exe'),
+﻿param(
+    [string]$Executable = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) '运行程序\Codex用量任务栏.exe'),
     [switch]$RestartExplorer
 )
 $ErrorActionPreference = 'Stop'

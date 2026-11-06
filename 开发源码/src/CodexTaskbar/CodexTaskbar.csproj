@@ -6,9 +6,14 @@
     <UseWPF>true</UseWPF>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AssemblyName>CodexTaskbar</AssemblyName>
-    <Version>1.2.1</Version>
+    <AssemblyName>Codex用量任务栏</AssemblyName>
+    <AssemblyTitle>Codex用量任务栏</AssemblyTitle>
+    <Product>Codex用量任务栏</Product>
+    <Description>在Windows任务栏显示Codex订阅剩余额度、今日用量和重置时间。</Description>
+    <ApplicationIcon>Assets/app.ico</ApplicationIcon>
+    <Version>1.3.0</Version>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
   </PropertyGroup>
   <ItemGroup><ProjectReference Include="../CodexTaskbar.Core/CodexTaskbar.Core.csproj"/></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="Assets/app.ico" LogicalName="CodexTaskbar.AppIcon"/></ItemGroup>
 </Project>

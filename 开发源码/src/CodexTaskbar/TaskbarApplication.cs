@@ -108,7 +108,7 @@ internal sealed class TaskbarApplication:ApplicationContext
     }
     private string TooltipText()
     {
-        var lines=new List<string>{"Codex 用量 · "+DateTime.Now.ToString("yyyy-MM-dd"),
+        var lines=new List<string>{AppBrand.Name+" · "+DateTime.Now.ToString("yyyy-MM-dd"),
             "今日累计："+(dailyTokens?.ToString("N0",CultureInfo.CurrentCulture)??"--")+" Token",
             "范围：本机全部桌面主会话，按本地日期统计增量（含归档）",
             "缓存与推理子项不重复相加；午夜自动开始新一天",
@@ -126,16 +126,17 @@ internal sealed class TaskbarApplication:ApplicationContext
         }
         if(quotaClient.AutomaticReconnectCount>0)lines.Add($"额度连接自动重建 {quotaClient.AutomaticReconnectCount} 次 · 最近 {quotaClient.LastAutomaticReconnect?.ToLocalTime():MM-dd HH:mm:ss}");
         if(quotaError is not null)lines.Add(quotaError);if(sessionError is not null)lines.Add(sessionError);if(host.Error is not null)lines.Add(host.Error);
+        if(Settings.StartupMigrationError is not null)lines.Add(Settings.StartupMigrationError);
         return string.Join("\n",lines);
     }
     private void BuildMenu(ContextMenuStrip menu)
     {
         foreach(ToolStripItem item in menu.Items.Cast<ToolStripItem>().ToArray())item.Dispose();menu.Items.Clear();
-        menu.Items.Add(new ToolStripMenuItem(host.Attached?"Codex 用量 · 已嵌入任务栏":"Codex 用量 · "+(host.Error??"初始化中")){Enabled=false});
+        menu.Items.Add(new ToolStripMenuItem(AppBrand.Name+" · "+(host.Attached?"已嵌入任务栏":host.Error??"初始化中")){Enabled=false});
         menu.Items.Add("立即刷新",null,(_,_)=>{nextQuota=DateTimeOffset.MinValue;lastScan=DateTimeOffset.MinValue;});
-        menu.Items.Add("查看用量详情",null,(_,_)=>MessageBox.Show(TooltipText(),"Codex 用量详情",MessageBoxButtons.OK,MessageBoxIcon.Information));
+        menu.Items.Add("查看用量详情",null,(_,_)=>MessageBox.Show(TooltipText(),AppBrand.Name+" · 用量详情",MessageBoxButtons.OK,MessageBoxIcon.Information));
         menu.Items.Add(new ToolStripSeparator());
-        var startup=new ToolStripMenuItem("开机启动"){Checked=Settings.AutoStartEnabled};startup.Click+=(_,_)=>{try{Settings.SetAutoStart(!startup.Checked);}catch(Exception e) when(e is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException){MessageBox.Show("无法更新开机启动设置。","Codex 用量");}};menu.Items.Add(startup);
+        var startup=new ToolStripMenuItem("开机启动"){Checked=Settings.AutoStartEnabled};startup.Click+=(_,_)=>{try{Settings.SetAutoStart(!startup.Checked);}catch(Exception e) when(e is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException){MessageBox.Show("无法更新开机启动设置。",AppBrand.Name);}};menu.Items.Add(startup);
         menu.Items.Add("退出",null,(_,_)=>ExitThread());
     }
     private void Post(Action action)
@@ -174,7 +175,7 @@ internal sealed class TaskbarApplication:ApplicationContext
         });return response.Task;
     }
     private string StatusJson()=>JsonSerializer.Serialize(new{
-        running=true,pid=Environment.ProcessId,attached=host.Attached,embeddingError=host.Error,
+        running=true,pid=Environment.ProcessId,applicationName=AppBrand.Name,executable=Environment.ProcessPath,autoStartEnabled=Settings.AutoStartEnabled,startupMigrationError=Settings.StartupMigrationError,attached=host.Attached,embeddingError=host.Error,
         parentClass=host.Parent==0?null:Native.Class(host.Parent),window=surface.Handle.ToInt64(),parent=host.Parent.ToInt64(),bounds=host.Bounds,keepingLastLayout=host.KeepingLastLayout,
         visible=Native.IsWindowVisible(surface.Handle),actualBounds=Native.Bounds(surface.Handle),style=Native.GetWindowLong(surface.Handle,Native.GwlStyle),
         exStyle=Native.GetWindowLong(surface.Handle,-20),paintCount=surface.PaintCount,

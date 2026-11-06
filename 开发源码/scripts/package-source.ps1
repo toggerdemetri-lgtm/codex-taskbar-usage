@@ -1,8 +1,8 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path -Parent $PSScriptRoot
 $taskPackages = Join-Path (Split-Path -Parent $taskRoot) '发布包'
 New-Item -ItemType Directory -Path $taskPackages -Force | Out-Null
-$taskZipPath = Join-Path $taskPackages 'Codex任务栏用量-完整源码.zip'
+$taskZipPath = Join-Path $taskPackages 'Codex用量任务栏-完整源码.zip'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 Push-Location -LiteralPath $taskRoot
 try {

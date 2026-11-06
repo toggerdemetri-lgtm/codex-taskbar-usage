@@ -19,8 +19,8 @@ internal sealed class TaskbarSurface:Form
     internal double TextScale=>UsageLayout.FontScale(DpiScale,Height,LineHeightAtScaleOne);
     private TaskbarSurface()
     {
-        Text="Codex Taskbar";FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;StartPosition=FormStartPosition.Manual;
-        Bounds=new(-10000,-10000,240,36);AutoScaleMode=AutoScaleMode.None;DoubleBuffered=true;AccessibleName="Codex 用量";AccessibleRole=AccessibleRole.Pane;
+        Text=AppBrand.Name;Icon=AppBrand.WindowIcon;FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;StartPosition=FormStartPosition.Manual;
+        Bounds=new(-10000,-10000,240,36);AutoScaleMode=AutoScaleMode.None;DoubleBuffered=true;AccessibleName=AppBrand.Name;AccessibleRole=AccessibleRole.Pane;
     }
     protected override bool ShowWithoutActivation=>true;
     internal static TaskbarSurface CreateForTaskbar(nint dpiParent=0)

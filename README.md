@@ -1,4 +1,6 @@
-# Codex 任务栏用量
+# Codex用量任务栏
+
+<img src="开发源码/src/CodexTaskbar/Assets/app-icon.png" width="96" alt="Codex用量任务栏图标">
 
 在 Windows 10 / Windows 11 任务栏中查看 Codex 今日 Token 用量、订阅剩余额度和重置时间。
 
@@ -12,9 +14,9 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| `CodexTaskbar-v1.2.1-win10-win11-x64.zip` | 日常使用的便携版，解压后双击 `CodexTaskbar.exe`，自带 .NET 运行环境。 |
-| `CodexTaskbar-v1.2.1-plugin-win10-win11-x64.zip` | 同一程序加本地 Codex 插件，可通过指令启动、停止、查询状态。 |
-| `CodexTaskbar-v1.2.1-source.zip` | 源码、构建脚本及回归测试的独立归档。 |
+| `Codex用量任务栏-v1.3.0-Windows10-11-x64.zip` | 日常使用的便携版，解压后双击 `Codex用量任务栏.exe`，自带 .NET 运行环境。 |
+| `Codex用量任务栏-v1.3.0-插件版-Windows10-11-x64.zip` | 同一程序加本地 Codex 插件，可通过指令启动、停止、查询状态。 |
+| `Codex用量任务栏-v1.3.0-源码.zip` | 源码、构建脚本及回归测试的独立归档。 |
 
 目标系统为 Windows 10 2004（build 19041）及以上、Windows 11，x64 主屏水平任务栏；需要已安装、已登录且支持该系统的 Codex 桌面版。开机启动默认关闭。
 
@@ -62,7 +64,7 @@ Set-Location .\开发源码
 .\scripts\dotnet.ps1 run --project tests\CodexTaskbar.Tests -c Release
 ```
 
-已通过 64 项行为测试、6 项查询恢复集成测试、4 项原生启动注册测试和 7 项 Windows 原生检查。原生检查可运行：
+已通过 64 项行为测试、6 项查询恢复集成测试、8 项原生启动注册测试和 7 项 Windows 原生检查。原生检查可运行：
 
 ```powershell
 .\scripts\dotnet.ps1 run --project tests\CodexTaskbar.WindowsTests -c Release
@@ -73,10 +75,10 @@ Set-Location .\开发源码
 ## 本地控制
 
 ```powershell
-.\CodexTaskbar.exe --start
-.\CodexTaskbar.exe --menu
-.\CodexTaskbar.exe --status --output .\status.json
-.\CodexTaskbar.exe --stop
+.\Codex用量任务栏.exe --start
+.\Codex用量任务栏.exe --menu
+.\Codex用量任务栏.exe --status --output .\status.json
+.\Codex用量任务栏.exe --stop
 ```
 
 任务栏空间不足时会暂时隐藏，减少按钮后恢复；此时再次双击 EXE 仍可打开菜单。原生嵌入依赖 Explorer 窗口结构，Windows 更新后可能需要适配。

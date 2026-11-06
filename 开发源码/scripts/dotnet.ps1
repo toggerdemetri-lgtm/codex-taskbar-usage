@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path -Parent $PSScriptRoot
 $env:DOTNET_CLI_HOME = Join-Path $taskRoot '.tools\cli-home'
 $env:NUGET_PACKAGES = if ($env:CODEX_TASKBAR_NUGET) { $env:CODEX_TASKBAR_NUGET } else { Join-Path $taskRoot '.tools\nuget' }

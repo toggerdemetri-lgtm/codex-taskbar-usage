@@ -1,10 +1,11 @@
-param(
-    [string]$Executable=(Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) '运行程序\CodexTaskbar.exe'),
-    [string]$Shortcut=(Join-Path ([Environment]::GetFolderPath('Startup')) 'CodexTaskbar.lnk')
+﻿param(
+    [string]$Executable=(Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) '运行程序\Codex用量任务栏.exe'),
+    [string]$Shortcut=(Join-Path ([Environment]::GetFolderPath('Startup')) 'Codex用量任务栏.lnk')
 )
 $ErrorActionPreference='Stop'
 $taskExe=(Resolve-Path -LiteralPath $Executable).Path
-$taskBefore=@(Get-Process -Name CodexTaskbar -ErrorAction SilentlyContinue)
+$taskProcessNames=@('CodexTaskbar',[IO.Path]::GetFileNameWithoutExtension($taskExe))|Sort-Object -Unique
+$taskBefore=@(Get-Process -Name $taskProcessNames -ErrorAction SilentlyContinue)
 if($taskBefore.Count -gt 1){throw '存在多个组件实例，停止测试'}
 $taskRestoreExe=if($taskBefore.Count -eq 1){$taskBefore[0].Path}else{$taskExe}
 $taskKey=[Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Software\Microsoft\Windows\CurrentVersion\Run',$true)
@@ -26,8 +27,8 @@ function Invoke-Component([string]$taskCommand){
 function Stop-Component{
     $null=Invoke-Component 'stop'
     $taskDeadline=[DateTime]::UtcNow.AddSeconds(5)
-    while((Get-Process -Name CodexTaskbar -ErrorAction SilentlyContinue) -and [DateTime]::UtcNow -lt $taskDeadline){Start-Sleep -Milliseconds 100}
-    if(Get-Process -Name CodexTaskbar -ErrorAction SilentlyContinue){throw '组件未正常退出'}
+    while((Get-Process -Name $taskProcessNames -ErrorAction SilentlyContinue) -and [DateTime]::UtcNow -lt $taskDeadline){Start-Sleep -Milliseconds 100}
+    if(Get-Process -Name $taskProcessNames -ErrorAction SilentlyContinue){throw '组件未正常退出'}
 }
 try{
     Stop-Component
@@ -35,7 +36,7 @@ try{
     $taskOff=Start-Process -FilePath $taskExe -ArgumentList '--autostart' -WindowStyle Hidden -PassThru
     $taskLaunched+=,$taskOff
     if(!$taskOff.WaitForExit(5000) -or $taskOff.ExitCode -ne 0){throw '关闭开机启动后，自动启动入口仍在运行'}
-    if(Get-Process -Name CodexTaskbar -ErrorAction SilentlyContinue){throw '关闭开关后仍拉起组件'}
+    if(Get-Process -Name $taskProcessNames -ErrorAction SilentlyContinue){throw '关闭开关后仍拉起组件'}
     Write-Output 'PASS disabled autostart exits without launching the component'
     $taskKey.SetValue('CodexTaskbar',('"'+$taskExe+'" --start'),[Microsoft.Win32.RegistryValueKind]::String)
     $taskPending=Start-Process -FilePath $taskExe -ArgumentList '--autostart' -WindowStyle Hidden -PassThru
@@ -75,5 +76,5 @@ try{
     $null=Invoke-Component 'stop'
     foreach($taskChild in $taskLaunched){if($null -ne $taskChild -and !$taskChild.HasExited -and !$taskChild.WaitForExit(5000)){$taskChild.Kill();$taskChild.WaitForExit()};if($null -ne $taskChild){$taskChild.Dispose()}}
     $taskKey.SetValue('CodexTaskbar',$taskOriginal,$taskKind);$taskKey.Dispose()
-    if(!(Get-Process -Name CodexTaskbar -ErrorAction SilentlyContinue)){Start-Process -FilePath $taskRestoreExe -ArgumentList '--start' -WindowStyle Hidden}
+    if(!(Get-Process -Name $taskProcessNames -ErrorAction SilentlyContinue)){Start-Process -FilePath $taskRestoreExe -ArgumentList '--start' -WindowStyle Hidden}
 }
