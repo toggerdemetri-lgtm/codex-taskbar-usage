@@ -22,12 +22,7 @@ internal sealed class Settings
         File.Move(temp,AppPaths.SettingsFile,true);
     }
     private const string RunKey="Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-    private static string StartupCommand=>"\""+Path.Combine(AppContext.BaseDirectory,"CodexTaskbar.exe")+"\" --start";
-    public static bool AutoStartEnabled {get{using var key=Registry.CurrentUser.OpenSubKey(RunKey);return string.Equals(key?.GetValue("CodexTaskbar") as string,StartupCommand,StringComparison.OrdinalIgnoreCase);}}
-    public static void SetAutoStart(bool enabled)
-    {
-        using var key=Registry.CurrentUser.CreateSubKey(RunKey);
-        if(enabled)key.SetValue("CodexTaskbar",StartupCommand,RegistryValueKind.String);
-        else key.DeleteValue("CodexTaskbar",false);
-    }
+    private static readonly StartupRegistration Startup=new(Path.Combine(AppContext.BaseDirectory,"CodexTaskbar.exe"),Environment.GetFolderPath(Environment.SpecialFolder.Startup),RunKey);
+    public static bool AutoStartEnabled=>Startup.Enabled;
+    public static void SetAutoStart(bool enabled)=>Startup.SetEnabled(enabled);
 }

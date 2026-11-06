@@ -16,11 +16,20 @@ internal static class Program
             if(command=="capture" && output is not null)File.WriteAllText(Path.GetFullPath(output)+".json",response);
             Console.WriteLine(response);return 0;
         }
-        using var mutex=new Mutex(true,"Local\\"+ControlServer.InstanceName,out var first);
-        if(!first)
-        {var response=ControlServer.SendAsync(args.Contains("--start")?"refresh":"menu").GetAwaiter().GetResult();Console.WriteLine(response??"{\"running\":true}");return response is null?2:0;}
         try
         {
+            var autostart=args.Contains("--autostart");
+            if(autostart)
+            {
+                if(!Settings.AutoStartEnabled)return 0;
+                Thread.Sleep(TimeSpan.FromSeconds(15));
+                if(!Settings.AutoStartEnabled)return 0;
+            }
+            using var mutex=new Mutex(true,"Local\\"+ControlServer.InstanceName,out var first);
+            if(!first)
+            {var response=ControlServer.SendAsync(args.Contains("--start")||autostart?"refresh":"menu").GetAwaiter().GetResult();Console.WriteLine(response??"{\"running\":true}");return response is null?2:0;}
+            try
+            {
             if(!OperatingSystem.IsWindowsVersionAtLeast(10,0,19041))
             {MessageBox.Show("此版本需要Windows 10 2004及以上或Windows 11（x64）。","Codex 用量",MessageBoxButtons.OK,MessageBoxIcon.Information);return 1;}
             ApplicationConfiguration.Initialize();
@@ -31,6 +40,8 @@ internal static class Program
                 return g.Error is null?0:1;
             }
             using var context=new TaskbarApplication();Application.Run(context);return 0;
+            }
+            finally{mutex.ReleaseMutex();}
         }
         catch(Exception e)
         {
@@ -38,7 +49,6 @@ internal static class Program
             File.AppendAllText(Path.Combine(AppPaths.DataDirectory,"errors.log"),$"{DateTimeOffset.Now:O} {e.GetType().Name}\n");
             return 1;
         }
-        finally{mutex.ReleaseMutex();}
     }
     internal static string? ValueAfter(string[] args,string name){var i=Array.IndexOf(args,name);return i>=0&&i+1<args.Length?args[i+1]:null;}
 }

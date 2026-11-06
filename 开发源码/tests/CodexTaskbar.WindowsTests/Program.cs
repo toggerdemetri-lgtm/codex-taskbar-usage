@@ -11,6 +11,7 @@ internal static class Program
     {
         if(args.Length>0 && args[0]=="app-server")return QuotaClientRecoveryTests.RunFakeServer();
         var failures=QuotaClientRecoveryTests.RunAsync().GetAwaiter().GetResult();
+        failures+=StartupRegistrationTests.Run();
         Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
         Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
         foreach(var context in new nint[]{-2,-4})

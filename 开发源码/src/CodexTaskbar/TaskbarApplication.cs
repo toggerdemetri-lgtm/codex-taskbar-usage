@@ -135,7 +135,7 @@ internal sealed class TaskbarApplication:ApplicationContext
         menu.Items.Add("立即刷新",null,(_,_)=>{nextQuota=DateTimeOffset.MinValue;lastScan=DateTimeOffset.MinValue;});
         menu.Items.Add("查看用量详情",null,(_,_)=>MessageBox.Show(TooltipText(),"Codex 用量详情",MessageBoxButtons.OK,MessageBoxIcon.Information));
         menu.Items.Add(new ToolStripSeparator());
-        var startup=new ToolStripMenuItem("开机启动"){Checked=Settings.AutoStartEnabled};startup.Click+=(_,_)=>{try{Settings.SetAutoStart(!startup.Checked);}catch(Exception e) when(e is IOException or UnauthorizedAccessException){MessageBox.Show("无法更新开机启动设置。","Codex 用量");}};menu.Items.Add(startup);
+        var startup=new ToolStripMenuItem("开机启动"){Checked=Settings.AutoStartEnabled};startup.Click+=(_,_)=>{try{Settings.SetAutoStart(!startup.Checked);}catch(Exception e) when(e is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException){MessageBox.Show("无法更新开机启动设置。","Codex 用量");}};menu.Items.Add(startup);
         menu.Items.Add("退出",null,(_,_)=>ExitThread());
     }
     private void Post(Action action)

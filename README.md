@@ -12,9 +12,9 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| `CodexTaskbar-v1.2.0-win10-win11-x64.zip` | 日常使用的便携版，解压后双击 `CodexTaskbar.exe`，自带 .NET 运行环境。 |
-| `CodexTaskbar-v1.2.0-plugin-win10-win11-x64.zip` | 同一程序加本地 Codex 插件，可通过指令启动、停止、查询状态。 |
-| `CodexTaskbar-v1.2.0-source.zip` | 源码、构建脚本及回归测试的独立归档。 |
+| `CodexTaskbar-v1.2.1-win10-win11-x64.zip` | 日常使用的便携版，解压后双击 `CodexTaskbar.exe`，自带 .NET 运行环境。 |
+| `CodexTaskbar-v1.2.1-plugin-win10-win11-x64.zip` | 同一程序加本地 Codex 插件，可通过指令启动、停止、查询状态。 |
+| `CodexTaskbar-v1.2.1-source.zip` | 源码、构建脚本及回归测试的独立归档。 |
 
 目标系统为 Windows 10 2004（build 19041）及以上、Windows 11，x64 主屏水平任务栏；需要已安装、已登录且支持该系统的 Codex 桌面版。开机启动默认关闭。
 
@@ -62,7 +62,7 @@ Set-Location .\开发源码
 .\scripts\dotnet.ps1 run --project tests\CodexTaskbar.Tests -c Release
 ```
 
-已通过 64 项行为测试、6 项查询恢复集成测试和 7 项 Windows 原生检查。原生检查可运行：
+已通过 64 项行为测试、6 项查询恢复集成测试、4 项原生启动注册测试和 7 项 Windows 原生检查。原生检查可运行：
 
 ```powershell
 .\scripts\dotnet.ps1 run --project tests\CodexTaskbar.WindowsTests -c Release
@@ -80,3 +80,5 @@ Set-Location .\开发源码
 ```
 
 任务栏空间不足时会暂时隐藏，减少按钮后恢复；此时再次双击 EXE 仍可打开菜单。原生嵌入依赖 Explorer 窗口结构，Windows 更新后可能需要适配。
+
+启用“开机启动”会同时设置当前用户Run项和直接指向程序的普通启动快捷方式。快捷方式的自动启动入口等待15秒让桌面就绪，并在等待前后检查开关；关闭时移除两处入口。升级后已启用自启动的用户，可关闭再开启一次以补建普通快捷方式。
