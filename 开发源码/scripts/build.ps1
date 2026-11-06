@@ -11,21 +11,15 @@ try {
     & (Join-Path $PSScriptRoot 'dotnet.ps1') publish 'src\CodexTaskbar' --configuration Release --runtime win-x64 --self-contained true '-p:PublishSingleFile=true' '-p:IncludeNativeLibrariesForSelfExtract=true' '-p:DebugType=None' --output $taskPublish
     if ($LASTEXITCODE -ne 0) { throw '发布失败' }
     Copy-Item -LiteralPath (Join-Path $taskRoot 'README.md') -Destination $taskPublish -Force
-    $taskPlugin = Join-Path $taskRoot 'artifacts\codex-taskbar-plugin'
-    New-Item -ItemType Directory -Path $taskPlugin -Force | Out-Null
-    Get-ChildItem -LiteralPath (Join-Path $taskRoot 'plugin') -Force | Copy-Item -Destination $taskPlugin -Recurse -Force
-    $taskPluginBin = Join-Path $taskPlugin 'bin\win-x64'
-    New-Item -ItemType Directory -Path $taskPluginBin -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $taskPublish 'Codex用量任务栏.exe') -Destination $taskPluginBin -Force
-    Copy-Item -LiteralPath (Join-Path $taskRoot 'README.md') -Destination $taskPlugin -Force
     Copy-Item -LiteralPath (Join-Path $taskRoot 'docs\images\taskbar.png') -Destination (Join-Path $taskPublish '效果截图.png') -Force
     Compress-Archive -Path $taskPublish -DestinationPath (Join-Path $taskPackages 'Codex用量任务栏-便携版-Windows10-11-x64.zip') -Force
-    # Include the hidden compatibility manifest; Compress-Archive can omit hidden items.
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $taskPluginZip = Join-Path $taskPackages 'Codex用量任务栏-Codex插件版-Windows10-11-x64.zip'
-    if (Test-Path -LiteralPath $taskPluginZip) { Remove-Item -LiteralPath $taskPluginZip -Force }
-    [System.IO.Compression.ZipFile]::CreateFromDirectory($taskPlugin,$taskPluginZip)
-    & (Join-Path $PSScriptRoot 'package-source.ps1')
+    & (Join-Path $taskRoot 'scripts\package-source.ps1')
+    $taskArchiveNames = @('Codex用量任务栏-便携版-Windows10-11-x64.zip','Codex用量任务栏-完整源码.zip')
+    $taskChecksums = foreach ($taskArchiveName in $taskArchiveNames) {
+        $taskHash = (Get-FileHash -LiteralPath (Join-Path $taskPackages $taskArchiveName) -Algorithm SHA256).Hash.ToLowerInvariant()
+        "$taskHash  $taskArchiveName"
+    }
+    [IO.File]::WriteAllText((Join-Path $taskPackages 'SHA256SUMS.txt'),(($taskChecksums -join "`n")+"`n"),[Text.UTF8Encoding]::new($false))
     Write-Output $taskPublish
-    Write-Output $taskPluginZip
+    Write-Output (Join-Path $taskPackages 'SHA256SUMS.txt')
 } finally { Pop-Location }

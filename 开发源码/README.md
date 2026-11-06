@@ -26,7 +26,7 @@ Windows 10（2004/build19041及以上）和Windows 11 x64兼容组件，在主�
 
 支持本机桌面会话、主屏水平任务栏和订阅剩余额度。没有 API 金额、跨机器聚合或充值 Credits 功能。自定义 `CODEX_HOME` 时跟随该目录。版本1.3.0增加原生登录启动补偿，保留1.2.0的额度查询自动恢复，保留1.1.0的Windows10传统任务栏控件和DPI适配；Win11 24H2已实测，Win10尚待真实设备验收。
 
-## 命令和本地插件
+## 本地控制命令
 
 ```powershell
 .\Codex用量任务栏.exe --start
@@ -38,7 +38,7 @@ Windows 10（2004/build19041及以上）和Windows 11 x64兼容组件，在主�
 
 `--menu` 打开用量区域的控制菜单。`--capture` 截取任务栏及已展开菜单，作为本地诊断文件。重复启动复用现有实例，并打开菜单；`--start` 则只启动或刷新。状态中 `attached=true` 才表示成功嵌入。
 
-`Codex用量任务栏-Codex插件版-Windows10-11-x64.zip` 包含本地 Codex 插件清单、skill、控制脚本和同一程序；解压后可由本地插件加载机制加载，也可直接执行 `scripts\control.ps1 -Action Start|Stop|Status`。未发布到插件市场，未自动更改 Codex 插件配置。
+发行文件仅包含普通便携版、完整源码和 `SHA256SUMS.txt` 校验清单，以后不再提供插件版。以上命令由普通EXE直接支持。
 
 开机启动仅由菜单开关写入当前用户 Run 项。旧版本的会话锁定文件不再读取。卸载时先取消开机启动并退出，然后删除解压目录；可选删除 `%LOCALAPPDATA%\CodexTaskbar` 中的旧设置及诊断数据。
 

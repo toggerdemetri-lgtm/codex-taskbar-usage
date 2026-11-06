@@ -15,8 +15,10 @@
 | 文件 | 用途 |
 | --- | --- |
 | `CodexTaskbar-v1.3.0-win10-win11-x64.zip` | 日常使用的便携版，解压后双击 `Codex用量任务栏.exe`，自带 .NET 运行环境。 |
-| `CodexTaskbar-v1.3.0-plugin-win10-win11-x64.zip` | 同一程序加本地 Codex 插件，可通过指令启动、停止、查询状态。 |
 | `CodexTaskbar-v1.3.0-source.zip` | 源码、构建脚本及回归测试的独立归档。 |
+| `SHA256SUMS.txt` | 便携版和源码包的 SHA256 校验清单。 |
+
+发行文件只提供便携版、源码和校验清单，以后不再发布插件版。页面中的 `Source code (zip / tar.gz)` 由 GitHub 自动生成，也是源码，不是程序。
 
 目标系统为 Windows 10 2004（build 19041）及以上、Windows 11，x64 主屏水平任务栏；需要已安装、已登录且支持该系统的 Codex 桌面版。开机启动默认关闭。
 
